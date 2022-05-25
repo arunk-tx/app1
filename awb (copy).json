@@ -1,0 +1,16 @@
+{
+  "appType": "kubedirectorapp",
+  "distroId": "",
+  "logoUrl": "",
+  "systemdRequired": false,
+  "labels": {},
+  "capabilities": [],
+  "configkeys": {},
+  "defaultImage": null,
+  "appmetadata": {
+    "name": "wp1",
+    "description": "test",
+    "distroId": "1",
+    "version": 2.2
+  }
+}
