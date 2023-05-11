@@ -3,36 +3,36 @@ provider "aws" {
 }
 #Creation of vpc
 resource "aws_vpc" "main" {
-  cidr_block       = "10.4"
-  instance_tenancy = "dedicated"
-  enable_dns_support = "true"
+  cidr_block       = "10.2.3"
+  instance_tenancy = "default"
+  enable_dns_support   = "true"
   enable_dns_hostnames = "false"
 
    tags = {
-    Name = "no"
+     Name = "sdsf"
   }
 }
 
 
 #public subnet
-resource "aws_subnet" "tag1" {
-  vpc_id = aws_vpc.main.id,
-  cidr_block = "10.3.6",
+resource "aws_subnet" "dfd" {
+  vpc_id                  = aws_vpc.main.id,
+  cidr_block              = "10.46.66",
   map_public_ip_on_launch = "true",
-  availability_zone = "ap-south-1a"
+  availability_zone       = "ap-south-1a"
 
     tags = {
-    Name = "tag1"
+      Name = "dfd"
   }
 }
 #public subnet
-resource "aws_subnet" "tag2" {
-  vpc_id = aws_vpc.main.id,
-  cidr_block = "10.7.8",
+resource "aws_subnet" "fdfd" {
+  vpc_id                  = aws_vpc.main.id,
+  cidr_block              = "10.5.7",
   map_public_ip_on_launch = "false",
-  availability_zone = "ap-south-1b"
+  availability_zone       = "ap-south-1a"
 
     tags = {
-    Name = "tag2"
+      Name = "fdfd"
   }
 }
