@@ -3,4 +3,4 @@ provider "aws" {
 }
 
 sas
-trest
+trests
