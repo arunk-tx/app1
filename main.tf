@@ -4,16 +4,12 @@ provider "aws" {
 
 //ec2
 
-resource "aws_instance" "" {
+resource "aws_instance"  {
     ami = "ami-0b635f252eee7afbc"
     instance_type = "t2.micro"
     count = 1
     security_groups = [resource.aws_security_group.TF_SG.name] 
     key_name = resource.aws_key_pair.Tf_Key.key_name
- 
-    tags = {
-        name = "prod"
-    }
 
 }
 
