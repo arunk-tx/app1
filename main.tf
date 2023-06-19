@@ -1,42 +1,34 @@
 provider "aws" {
-    region = "asa"
+    region = "as"
 }
+resource "aws_elb" "bar" {
+  name               = "foobar-terraform-elb"
+  availability_zones = ["us-west-2b", "us-west-2c"]
 
-# Create the EKS cluster
-resource "aws_eks_cluster" "my_cluster" {
-  name     = "my-cluster"
-  role_arn = aws_iam_role.my_cluster_role.arn
-  version  = "1.21"  # Replace with your desired EKS version
 
-  vpc_config {
-    subnet_ids = ["subnet-12345678", "subnet-23456789"]  # Replace with your desired subnet IDs
+  listener {
+    instance_port     = 8000
+    instance_protocol = "http"
+    lb_port           = 80
+    lb_protocol       = "http"
   }
 
-  depends_on = [aws_iam_role_policy_attachment.my_cluster_attachment]
-}
 
-# Define the IAM role for the EKS cluster
-resource "aws_iam_role" "my_cluster_role" {
-  name = "my-cluster-role"
+  health_check {
+    healthy_threshold   = 2
+    unhealthy_threshold = 2
+    timeout             = 3
+    target              = "HTTP:8000/"
+    interval            = 30
+  }
 
-  assume_role_policy = <<EOF
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Effect": "Allow",
-      "Principal": {
-        "Service": "eks.amazonaws.com"
-      },
-      "Action": "sts:AssumeRole"
-    }
-  ]
-}
-EOF
-}
+  instances                   = ["i-0ea9f7ea3c0127414"]
+  cross_zone_load_balancing   = true
+  idle_timeout                = 400
+  connection_draining         = true
+  connection_draining_timeout = 400
 
-# Attach the necessary policies to the IAM role
-resource "aws_iam_role_policy_attachment" "my_cluster_attachment" {
-  role       = aws_iam_role.my_cluster_role.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
+  tags = {
+    Name = "foobar-terraform-elb"
+  }
 }
