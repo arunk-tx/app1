@@ -1,34 +1,80 @@
 provider "aws" {
-    region = "as"
+    region = "ap-south-1"
 }
-resource "aws_elb" "bar" {
-  name               = "foobar-terraform-elb"
-  availability_zones = ["us-west-2b", "us-west-2c"]
 
+//ec2
 
-  listener {
-    instance_port     = 8000
-    instance_protocol = "http"
-    lb_port           = 80
-    lb_protocol       = "http"
-  }
+resource "aws_instance" "" {
+    ami = "ami-0b635f252eee7afbc"
+    instance_type = "t2.micro"
+    count = 1
+    security_groups = [resource.aws_security_group.TF_SG.name] 
+    key_name = resource.aws_key_pair.Tf_Key.key_name
+ 
+    tags = {
+        name = "prod"
+    }
 
+}
 
-  health_check {
-    healthy_threshold   = 2
-    unhealthy_threshold = 2
-    timeout             = 3
-    target              = "HTTP:8000/"
-    interval            = 30
-  }
+resource "aws_security_group" "TF_SG" {
+    name        = "SG FROM TERRAFORM"
+    description = "SG FROM TERRAFORM"
+    vpc_id      =  "vpc-0aa93d4316752bc89"
 
-  instances                   = ["i-0ea9f7ea3c0127414"]
-  cross_zone_load_balancing   = true
-  idle_timeout                = 400
-  connection_draining         = true
-  connection_draining_timeout = 400
+    ingress {
+        description      = "HTTPS" 
+        from_port        = 443
+        to_port          = 443
+        protocol         = "tcp"
+        cidr_blocks      = ["0.0.0.0/0"]
+        ipv6_cidr_blocks = ["::/0"]
+    }
 
-  tags = {
-    Name = "foobar-terraform-elb"
-  }
+    ingress {
+        description      = "HTTP"
+        from_port        = 80
+        to_port          = 80
+        protocol         = "tcp"
+        cidr_blocks      = ["0.0.0.0/0"]
+        ipv6_cidr_blocks = ["::/0"]
+    }
+
+    ingress {
+        description      = "SSH"
+        from_port        = 22
+        to_port          = 22
+        protocol         = "tcp"
+        cidr_blocks      = ["0.0.0.0/0"]
+        ipv6_cidr_blocks = ["::/0"]
+    }
+
+    egress {
+        from_port        = 0
+        to_port          = 0
+        protocol         = "-1"
+        cidr_blocks      = ["0.0.0.0/0"]
+        ipv6_cidr_blocks = ["::/0"]
+    }
+
+    tags = {
+        Name = "TF_SG"
+    }
+}
+
+// creating key-pair in AWS and downloads pem file in your local system
+
+resource "aws_key_pair" "Tf_Key" {
+    key_name   = "Tf_key"
+    public_key = tls_private_key.rsa.public_key_openssh
+}
+
+resource "tls_private_key" "rsa" {
+    algorithm = "RSA"
+    rsa_bits  = 4096
+}
+
+resource "local_file" "Tf_Key" {
+    content  = tls_private_key.rsa.private_key_pem
+    filename = "Tf_key.pem"
 }
