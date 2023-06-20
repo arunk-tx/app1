@@ -1,76 +1,16 @@
-provider "aws" {
-    region = "ap-south-1"
+provider "azurerm" {
+  features {}
 }
 
-//ec2
-
-resource "aws_instance"  {
-    ami = "ami-0b635f252eee7afbc"
-    instance_type = "t2.micro"
-    count = 1
-    security_groups = [resource.aws_security_group.TF_SG.name] 
-    key_name = resource.aws_key_pair.Tf_Key.key_name
-
+# Create a resource group
+resource "azurerm_resource_group" "example" {
+  name     = "resource_data"
+  location = "ap-south-1"
 }
-
-resource "aws_security_group" "TF_SG" {
-    name        = "SG FROM TERRAFORM"
-    description = "SG FROM TERRAFORM"
-    vpc_id      =  "vpc-0aa93d4316752bc89"
-
-    ingress {
-        description      = "HTTPS" 
-        from_port        = 443
-        to_port          = 443
-        protocol         = "tcp"
-        cidr_blocks      = ["0.0.0.0/0"]
-        ipv6_cidr_blocks = ["::/0"]
-    }
-
-    ingress {
-        description      = "HTTP"
-        from_port        = 80
-        to_port          = 80
-        protocol         = "tcp"
-        cidr_blocks      = ["0.0.0.0/0"]
-        ipv6_cidr_blocks = ["::/0"]
-    }
-
-    ingress {
-        description      = "SSH"
-        from_port        = 22
-        to_port          = 22
-        protocol         = "tcp"
-        cidr_blocks      = ["0.0.0.0/0"]
-        ipv6_cidr_blocks = ["::/0"]
-    }
-
-    egress {
-        from_port        = 0
-        to_port          = 0
-        protocol         = "-1"
-        cidr_blocks      = ["0.0.0.0/0"]
-        ipv6_cidr_blocks = ["::/0"]
-    }
-
-    tags = {
-        Name = "TF_SG"
-    }
-}
-
-// creating key-pair in AWS and downloads pem file in your local system
-
-resource "aws_key_pair" "Tf_Key" {
-    key_name   = "Tf_key"
-    public_key = tls_private_key.rsa.public_key_openssh
-}
-
-resource "tls_private_key" "rsa" {
-    algorithm = "RSA"
-    rsa_bits  = 4096
-}
-
-resource "local_file" "Tf_Key" {
-    content  = tls_private_key.rsa.private_key_pem
-    filename = "Tf_key.pem"
+resource "azurerm_container_registry" "example" {
+  name                     = "sa"
+  resource_group_name      = azurerm_resource_group.example.name  
+  location                 = azurerm_resource_group.example.location 
+  sku                      = "standard"
+  admin_enabled            = "True"
 }
