@@ -1,16 +1,42 @@
-provider "azurerm" {
-  features {}
+provider "aws" {
+    region = "asa"
 }
 
-# Create a resource group
-resource "azurerm_resource_group" "example" {
-  name     = "resource_data"
-  location = "ap-south-1"
+# Create the EKS cluster
+resource "aws_eks_cluster" "my_cluster" {
+  name     = "my-cluster"
+  role_arn = aws_iam_role.my_cluster_role.arn
+  version  = "1.23"  # Replace with your desired EKS version
+
+  vpc_config {
+    subnet_ids = ["subnet-12345678", "subnet-23456789"]  # Replace with your desired subnet IDs
+  }
+
+  depends_on = [aws_iam_role_policy_attachment.my_cluster_attachment]
 }
-resource "azurerm_container_registry" "example" {
-  name                     = "sa"
-  resource_group_name      = azurerm_resource_group.example.name  
-  location                 = azurerm_resource_group.example.location 
-  sku                      = "standard"
-  admin_enabled            = "True"
+
+# Define the IAM role for the EKS cluster
+resource "aws_iam_role" "my_cluster_role" {
+  name = "my-cluster-role"
+
+  assume_role_policy = << EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "Service": "eks.amazonaws.com"
+      },
+      "Action": "sts:AssumeRole"
+    }
+  ]
+}
+EOF
+}
+
+# Attach the necessary policies to the IAM role
+resource "aws_iam_role_policy_attachment" "my_cluster_attachment" {
+  role       = aws_iam_role.my_cluster_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
 }
