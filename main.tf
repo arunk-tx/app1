@@ -1,5 +1,5 @@
 provider "aws" {
-    region = "ap-south-1"
+    region = "as"
 }
 resource "aws_elb" "bar" {
   name               = "foobar-terraform-elb"
